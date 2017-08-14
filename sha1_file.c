@@ -3751,7 +3751,6 @@ int for_each_file_in_obj_subdir(unsigned int subdir_nr,
 	origlen = path->len;
 	strbuf_complete(path, '/');
 	strbuf_addf(path, "%02x", subdir_nr);
-	baselen = path->len;
 
 	dir = opendir(path->buf);
 	if (!dir) {
@@ -3761,12 +3760,15 @@ int for_each_file_in_obj_subdir(unsigned int subdir_nr,
 		return r;
 	}
 
+	strbuf_addch(path, '/');
+	baselen = path->len;
+
 	while ((de = readdir(dir))) {
 		if (is_dot_or_dotdot(de->d_name))
 			continue;
 
 		strbuf_setlen(path, baselen);
-		strbuf_addf(path, "/%s", de->d_name);
+		strbuf_addstr(path, de->d_name);
 
 		if (strlen(de->d_name) == GIT_SHA1_HEXSZ - 2)  {
 			char hex[GIT_MAX_HEXSZ+1];
@@ -3792,7 +3794,7 @@ int for_each_file_in_obj_subdir(unsigned int subdir_nr,
 	}
 	closedir(dir);
 
-	strbuf_setlen(path, baselen);
+	strbuf_setlen(path, baselen - 1); /* chomp the '/' that we added */
 	if (!r && subdir_cb)
 		r = subdir_cb(subdir_nr, path->buf, data);
 
