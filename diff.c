@@ -923,7 +923,6 @@ static void mark_color_as_moved(struct diff_options *o,
 		}
 
 		l->flags |= DIFF_SYMBOL_MOVED_LINE;
-		block_length++;
 
 		if (o->color_moved == COLOR_MOVED_PLAIN)
 			continue;
@@ -953,7 +952,12 @@ static void mark_color_as_moved(struct diff_options *o,
 			}
 
 			flipped_block = (flipped_block + 1) % 2;
+
+			adjust_last_block(o, n, block_length);
+			block_length = 0;
 		}
+
+		block_length++;
 
 		if (flipped_block)
 			l->flags |= DIFF_SYMBOL_MOVED_LINE_ALT;
